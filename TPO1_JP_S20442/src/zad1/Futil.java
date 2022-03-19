@@ -2,13 +2,11 @@ package zad1;
 
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -27,8 +25,9 @@ public class Futil implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         if (attrs.isRegularFile() && !file.getFileName().toString().equals(outFileName)) {
-            RandomAccessFile file_tmp = new RandomAccessFile(file.toString(), "r");
-            inputFileChannel = file_tmp.getChannel();
+//            RandomAccessFile file_tmp = new RandomAccessFile(file.toString(), "r");
+//            inputFileChannel = file_tmp.getChannel();
+            FileChannel inputFileChannel = (FileChannel) Files.newByteChannel(file);
             MappedByteBuffer buf;
             buf = inputFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, (int) inputFileChannel.size());
             CharBuffer cbuf = SRC_FILE_ENCODING.decode(buf);
@@ -40,21 +39,24 @@ public class Futil implements FileVisitor<Path> {
     }
 
     public static void processDir(String dirName, String resultFileName) {
-        outFileName = resultFileName;
+
         String outputString = dirName + "/" + resultFileName;
         System.out.println(outputString);
-
+        outputPath = Paths.get(outputString);
+        try {
+            Files.deleteIfExists(outputPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         try {
-//            outputFileChannel = FileChannel.open(outputPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-//            outputFileChannel = new FileOutputStream(resultFileName).getChannel();
-            RandomAccessFile outFile = new RandomAccessFile(outputString, "rw");
-            outputFileChannel = outFile.getChannel();
+//            RandomAccessFile outFile = new RandomAccessFile(outputString, "rw");
+//            outputFileChannel = outFile.getChannel();
+            outputFileChannel =  FileChannel.open(outputPath,StandardOpenOption.CREATE_NEW,StandardOpenOption.APPEND);
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-//            pw = new PrintWriter(outFileName, String.valueOf(DEST_FILE_ENCODING));
             Path walkFileTree = Files.walkFileTree(Paths.get(dirName), new Futil());
             outputFileChannel.close();
         } catch (IOException e) {
