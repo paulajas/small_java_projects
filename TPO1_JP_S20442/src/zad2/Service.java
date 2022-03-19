@@ -10,19 +10,9 @@ package zad2;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
-import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.Locale;
@@ -53,9 +43,6 @@ public class Service {
             URL url = new URL(String.format(OPENWEATHER_API_URL, city, getCountryCode(), OPENWEATHER_API_KEY));
             URLConnection connection = url.openConnection();
             connection.setDoOutput(true);
-//            JsonParser jp = new JsonParser(); //from gson
-//            JsonElement root = jp.parse(new InputStreamReader((InputStream) connection.getContent())); //Convert the input stream to a json element
-//            JsonObject rootobj = root.getAsJsonObject();
             BufferedReader buf = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String line ;
             StringBuilder out = new StringBuilder();
@@ -63,8 +50,6 @@ public class Service {
                 out.append(line);
             }
             buf.close();
-//            JSONObject json = new JSONObject(out);
-            System.out.println(out.toString());
             return out.toString();
 
         } catch (MalformedURLException e) {
@@ -86,7 +71,6 @@ public class Service {
     }
     public Double getRateFor(String currency_code){
         Currency curr = Currency.getInstance(new Locale("en", getCountryCode()));
-        System.out.println(curr);
         String url_str = String.format(EXCHANGERATE_API_URL, curr, currency_code);
         URL url = null;
         try {
@@ -98,7 +82,6 @@ public class Service {
             JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
             JsonObject jsonobj = root.getAsJsonObject();
             double req_result = jsonobj.get("result").getAsDouble();
-            System.out.println(req_result);
             return req_result;
         } catch (IOException e) {
             e.printStackTrace();
@@ -129,25 +112,8 @@ public class Service {
             Matcher m_2 = p_2.matcher(str);
             m_2.find();
             String str_2  = m_2.group();
-//            JSONObject json = new JSONObject(out);
-            System.out.println(str_2);
-//            JsonParser jp = new JsonParser();
-//            JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
-//            String [] arr = root;
-//            System.out.println(root);
-//            String jsonData = readFromURL("http://api.nbp.pl/api/exchangerates/tables/A/") + readFromURL("http://api.nbp.pl/api/exchangerates/tables/B/");
-//            HttpURLConnection request = (HttpURLConnection) url.openConnection();
-//            request.connect();
-//            DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
-//            DocumentBuilder db = dbf.newDocumentBuilder();
-//            Document doc = db.parse(String.valueOf(url));
-//            System.out.println(doc);
+            return new Double(str_2);
 
-//            JsonParser jp = new JsonParser();
-//            JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
-//            JsonObject jsonobj = root.getAsJsonObject();
-////            double req_result = jsonobj.get("result").getAsDouble();
-//            System.out.println(jsonobj);
         } catch (IOException e) {
             e.printStackTrace();
         }

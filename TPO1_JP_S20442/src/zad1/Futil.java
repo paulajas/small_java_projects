@@ -1,6 +1,8 @@
 package zad1;
 
-import java.io.*;
+
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
@@ -25,39 +27,29 @@ public class Futil implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         if (attrs.isRegularFile() && !file.getFileName().toString().equals(outFileName)) {
-            RandomAccessFile file_tmp = new RandomAccessFile(file.toFile(), "rw");
+            RandomAccessFile file_tmp = new RandomAccessFile(file.toString(), "r");
             inputFileChannel = file_tmp.getChannel();
             MappedByteBuffer buf;
-            buf = inputFileChannel.map(FileChannel.MapMode.READ_WRITE,0,(int)inputFileChannel.size());
+            buf = inputFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, (int) inputFileChannel.size());
             CharBuffer cbuf = SRC_FILE_ENCODING.decode(buf);
             cbuf.rewind();
-
-            CharsetEncoder encoder = DEST_FILE_ENCODING.newEncoder();
-            encoder.encode(cbuf, buf, true);
-//            buf.flip();
-//            System.out.println(String.valueOf(cbuf));
-//            outputFileChannel.writeObject(cbuf);
-            outputFileChannel.write(buf);
-//            outputFileChannel.flush();
+            outputFileChannel.write(DEST_FILE_ENCODING.encode(cbuf));
             inputFileChannel.close();
-//            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(String.valueOf(file)), SRC_FILE_ENCODING));
-//            String line = br.readLine();
-//            while (line != null) {
-//                pw.println(line);
-//                line = br.readLine();
-//            }
-//            pw.flush();
         }
         return FileVisitResult.CONTINUE;
     }
 
     public static void processDir(String dirName, String resultFileName) {
         outFileName = resultFileName;
-        outputPath = Paths.get(dirName + "/" + resultFileName);
+        String outputString = dirName + "/" + resultFileName;
+        System.out.println(outputString);
+
 
         try {
 //            outputFileChannel = FileChannel.open(outputPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-            outputFileChannel = new FileOutputStream(resultFileName).getChannel();
+//            outputFileChannel = new FileOutputStream(resultFileName).getChannel();
+            RandomAccessFile outFile = new RandomAccessFile(outputString, "rw");
+            outputFileChannel = outFile.getChannel();
         } catch (IOException e) {
             e.printStackTrace();
         }
